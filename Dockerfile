@@ -12,8 +12,8 @@ RUN apt-get update -y
 RUN apt-get upgrade -y
 
 RUN apt-get install wget -y
-RUN wget http://archive.cloudera.com/cdh5/one-click-install/trusty/amd64/cdh5-repository_1.0_all.deb
-RUN dpkg -i /cdh5-repository_1.0_all.deb
+RUN wget https://archive.cloudera.com/cdh4/one-click-install/lucid/amd64/cdh4-repository_1.0_all.deb
+RUN dpkg -i /cdh4-repository_1.0_all.deb
 RUN sudo apt-get update -y
 
 
@@ -22,13 +22,29 @@ RUN apt-get install software-properties-common -y
 RUN add-apt-repository ppa:webupd8team/java -y
 RUN apt-get update -y
 RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-RUN apt-get install -y oracle-java7-installer vim
+RUN apt-get install -y openjdk-7-jdk vim
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
 RUN apt-get install hadoop-hdfs-namenode hadoop-hdfs-datanode -y
-RUN apt-get install impala impala-server impala-shell impala-catalog impala-state-store -y
+
+# Add Cloudera's Impala repository
+RUN echo "deb [arch=amd64] http://archive.cloudera.com/impala/debian/squeeze/amd64/impala squeeze contrib" > /etc/apt/sources.list.d/cloudera.list
+
+
+# Add Cloudera's Impala repository
+RUN echo "deb http://archive.cloudera.com/impala/debian/squeeze/amd64/impala squeeze-impala1 contrib" > /etc/apt/sources.list.d/cloudera.list
+RUN echo "deb-src http://archive.cloudera.com/impala/debian/squeeze/amd64/impala squeeze-impala1 contrib" >> /etc/apt/sources.list.d/cloudera.list
+
+RUN wget -qO - http://archive.cloudera.com/impala/debian/squeeze/amd64/impala/archive.key | apt-key add -
+
+#RUN apt-get install impala impala-server impala-shell impala-catalog impala-state-store -y
+RUN apt-get update -y
+RUN apt-get install -y impala impala-server impala-shell impala-catalog impala-state-store
+RUN impala-shell --version
+
+
 
 RUN mkdir /var/run/hdfs-sockets/ ||:
 RUN chown hdfs.hadoop /var/run/hdfs-sockets/
